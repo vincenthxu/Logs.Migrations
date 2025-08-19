@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Logs.Migrations": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\Vincent\\source\\repos\\Logs.Migrations"
+    }
+  }
+}
