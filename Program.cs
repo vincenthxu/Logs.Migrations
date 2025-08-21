@@ -4,184 +4,239 @@ namespace Logs.Migrations
 {
     internal class Program
     {
+        #region Fields
         static AppDbContext db;
         static User user;
         static Entry entry;
+        #endregion
         static void Main(string[] args)
         {
             db = new();
             Loop();
         }
-
         static void Loop()
         {
             do
             {
-                Prompt();
-                char c = GetChar();
-
+                DisplayOption();
+                char c = GetOption();
                 switch (c)
                 {
-                    case 'c':
-                        Prompt($"{c}");
-                        // Create: create a new object and save to the database
-                        c = GetChar();
-                        switch (c)
-                        {
-                            case 'a':
-                                Prompt($"{c}");
-
-                                Console.Write("Name: ");
-                                string? name = Console.ReadLine();
-
-                                Console.Write("Date of birth: ");
-                                string? dob = Console.ReadLine();
-
-                                user = new(name: name, dateOfBirth: DateOnly.Parse(dob));
-
-                                Console.WriteLine(user);
-                                db.Add(user);
-                                db.SaveChanges();
-
-                                break;
-                            case 'b':
-                                Prompt($"{c}");
-
-                                DateTime now = DateTime.Now;
-                                DateOnly date = DateOnly.FromDateTime(now);
-                                TimeOnly time = TimeOnly.FromDateTime(now);
-
-                                Console.Write("User name: ");
-                                Guid userId = db.Users.Where(u => u.Name == Console.ReadLine()).First().UserId;
-
-                                Entry entry = new(userId: userId, date: date, time: time, bristolStoolScale: BristolStoolScale.Type4);
-
-                                Console.WriteLine(entry);
-                                db.Add(entry);
-                                db.SaveChanges();
-
-                                break;
-                        }
+                    case 'c': // Create: create a new object and save to the database
+                        DisplayOption($"{c}");
+                        Create(option: GetOption());
                         break;
-                    case 'r':
-                        Prompt($"{c}");
-                        // Read: query the database for an object
-                        c = GetChar();
-                        switch (c)
-                        {
-                            case 'a':
-                                Prompt($"{c}");
-                                Console.Write("Name: ");
-                                string? name = Console.ReadLine();
-
-                                user = db.Users.Where(u => u.Name == name).First();
-                                Console.WriteLine(user);
-
-                                break;
-                            case 'b':
-                                Prompt($"{c}");
-                                Console.Write("Name: ");
-                                name = Console.ReadLine();
-
-                                user = db.Users.Where(u => u.Name == name).First();
-                                foreach (var item in db.Entries.Where(e => e.UserId == user.UserId))
-                                    Console.WriteLine(item);
-
-                                break;
-                        }
+                    case 'r': // Read: query the database for an object
+                        DisplayOption($"{c}");
+                        Read(option: GetOption());
                         break;
-                    case 'u':
-                        Prompt($"{c}");
-                        // Update: update an object and save to the database
-                        c = GetChar();
-                        switch (c)
-                        {
-                            case 'a':
-                                Console.WriteLine("Cannot update users");
-                                break;
-                            case 'b':
-                                Console.Write("Name: ");
-                                string? name = Console.ReadLine();
-
-                                Console.Write("Date: ");
-                                string? date = Console.ReadLine();
-
-                                user = db.Users.Where(u => u.Name == name).First();
-                                entry = db.Entries.Where(e => e.Date == DateOnly.Parse(date) && e.UserId == user.UserId).First();
-
-                                Console.Write("Notes: ");
-                                entry.Notes = Console.ReadLine();
-
-                                db.SaveChanges();
-
-                                break;
-                        }
+                    case 'u': // Update: update an object and save to the database
+                        DisplayOption($"{c}");
+                        Update(option: GetOption());
                         break;
-                    case 'd':
-                        Prompt($"{c}");
-                        // Delete: delete an object from the database
-                        c = GetChar();
-                        switch (c)
-                        {
-                            case 'a':
-                                Console.Write("Name: ");
-                                string? name = Console.ReadLine();
-
-                                user = db.Users.Where(u => u.Name == name).First();
-                                db.Remove(user);
-                                db.SaveChanges();
-
-                                break;
-                            case 'b':
-                                Console.Write("Name: ");
-                                name = Console.ReadLine();
-                                Console.Write("Date: ");
-                                string? date = Console.ReadLine();
-                                user = db.Users.Where(u => u.Name == name).First();
-
-                                foreach (var item in db.Entries.Where(e => e.UserId == user.UserId))
-                                {
-                                    db.Remove(item);
-                                }
-                                db.SaveChanges();
-
-                                break;
-                        }
+                    case 'd': // Delete: delete an object from the database
+                        DisplayOption($"{c}");
+                        Delete(option: GetOption());
                         break;
-                    case 'q':
+                    case 'q': // Quit: quit the application
+                        DisplayOption($"{c}");
                         return;
-                    default:
-                        Console.WriteLine($"{c} is not a valid choice.");
+                    case 'g': // Display all entites in the database
+                        db.Users.ForEachAsync(Console.WriteLine);
+                        db.Entries.ForEachAsync(Console.WriteLine);
+                        break;
+                    default: // Catch-all: invalid selection case
+                        PromptInvalidInput($"{c}");
                         break;
                 }
                 Console.ReadKey();
             }
             while (true);
         }
+        static void Create(char option)
+        {
+            Console.Write("Create ");
+            switch (option)
+            {
+                case 'a':
+                    try
+                    {
+                        user = new(name: PromptUserInput("Name"), dateOfBirth: DateOnly.Parse(PromptUserInput("Date of birth")));
+                        Console.WriteLine(user);
+                        db.Add(user);
+                        db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                case 'b':
+                    try
+                    {
+                        DateTime now = DateTime.Now;
+                        DateOnly date = DateOnly.FromDateTime(now);
+                        TimeOnly time = TimeOnly.FromDateTime(now);
+                        Guid userId = db.Users.Where(u => u.Name == PromptUserInput("Name")).First().Id;
+                        Entry entry = new(userId: userId, date: date, time: time, bristolStoolScale: BristolStoolScale.Type4);
+                        Console.WriteLine(entry);
+                        db.Add(entry);
+                        db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                default:
+                    PromptInvalidInput($"{option}");
+                    break;
+            }
+        }
+        static void Read(char option)
+        {
+            Console.Write("Read ");
+            switch (option)
+            {
+                case 'a':
+                    try
+                    {
+                        user = db.Users.Where(u => u.Name == PromptUserInput("Name")).First();
+                        Console.WriteLine(user);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                case 'b':
+                    try
+                    {
+                        int id = int.Parse(PromptUserInput("Id"));
+                        entry = db.Entries.Where(e => e.Id == id).First();
+                        Console.WriteLine(entry);
 
-        static void Prompt(string option = "")
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                default:
+                    PromptInvalidInput($"{option}");
+                    break;
+            }
+        }
+        static void Update(char option)
+        {
+            Console.Write("Update ");
+            switch (option)
+            {
+                case 'a':
+                    try
+                    {
+                        throw new NotImplementedException("User update feature not implemented!");
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                case 'b':
+                    try
+                    {
+                        int id = int.Parse(PromptUserInput("Id"));
+                        entry = db.Entries.Where(e => e.Id == id).First();
+                        entry.Date = DateOnly.Parse(PromptUserInput("Date"));
+                        entry.Time = TimeOnly.Parse(PromptUserInput("Time"));
+                        entry.BristolStoolScale = (BristolStoolScale)int.Parse(PromptUserInput("Bristol stool scale"));
+                        entry.Notes = PromptUserInput("Notes");
+                        db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"{e}");
+                    }
+                    break;
+                default:
+                    PromptInvalidInput($"{option}");
+                    break;
+            }
+        }
+        static void Delete(char option)
+        {
+            Console.Write("Delete ");
+            switch (option)
+            {
+                case 'a':
+                    try
+                    {
+                        user = db.Users.Where(u => u.Name == PromptUserInput("Name")).First();
+                        foreach (var item in db.Entries.Where(e => e.UserId == user.Id))
+                        {
+                            db.Remove(item);
+                        }
+                        db.Remove(user);
+                        db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                case 'b':
+                    try
+                    {
+                        int id = int.Parse(PromptUserInput("Id"));
+                        entry = db.Entries.Where(e => e.Id == id).First();
+                        db.Remove(entry);
+                        db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    break;
+                default:
+                    PromptInvalidInput($"{option}");
+                    break;
+            }
+        }
+        static void PromptInvalidInput(string input)
+        {
+            Console.WriteLine($"\"{input}\" is not a valid choice.");
+        }
+        static string? PromptUserInput(string prompt)
+        {
+            Console.Write($"{prompt}: ");
+            return Console.ReadLine();
+        }
+        static void DisplayOption(string option = "") // TODO: fix menu prompting for code reusability
         {
             Console.Clear();
             string[] choices = ["a) User", "b) Entry"];
-            Dictionary<string, string[]> prompt = new() {
-                { "", [ "Choose one of the following options:", "c) Create", "r) Read", "u) Update", "d) Delete", "q) Quit" ] },
-                { "c",  [ "Create:", choices[0], choices[1] ] },
-                { "r",  [ "Query:" , choices[0], choices[1] ] },
-                { "u",  [ "Update:", choices[0], choices[1] ] },
-                { "d",  [ "Delete:", choices[0], choices[1] ] },
-                { "a",  [ "User"] },
-                { "b",  [ "Entry"] },
-                { "q",  [ "Goodbye" ] },
+            Dictionary<string, string[]> prompt = new()
+            {
+                { "" , [ "Choose one of the following options:", "c) Create", "r) Read", "u) Update", "d) Delete", "q) Quit", "g) Display all" ] },
+                { "c", [ "Create:", choices[0], choices[1] ] },
+                { "r", [ "Query:" , choices[0], choices[1] ] },
+                { "u", [ "Update:", choices[0], choices[1] ] },
+                { "d", [ "Delete:", choices[0], choices[1] ] },
+                { "a", [ "User"] },
+                { "b", [ "Entry"] },
+                { "q", [ "Goodbye" ] },
+                { "g", [ "Display all entities in the database" ] },
             };
             foreach (var item in prompt[option])
+            {
                 Console.WriteLine(item);
+            }
         }
-
-        static char GetChar()
+        static char GetOption()
         {
-            char c;
-            while (!char.TryParse(Console.ReadLine(), out c)) ;
-            return c;
+            char option;
+            while (!char.TryParse(Console.ReadLine(), out option)) ;
+            return option;
         }
     }
 }
