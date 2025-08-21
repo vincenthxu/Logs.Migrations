@@ -5,14 +5,14 @@
         #region Constructors
         public User(string name, DateOnly dateOfBirth)
         {
-            UserId = Guid.NewGuid();
+            Id = Guid.NewGuid();
             Name = name;
             DateOfBirth = dateOfBirth;
         }
         #endregion
 
         #region Properties
-        public Guid UserId { get; private set; }
+        public Guid Id { get; private set; }
         public string? Name { get; private set; }
         public DateOnly DateOfBirth { get; private set; }
         public int Age

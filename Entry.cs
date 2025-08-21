@@ -10,7 +10,6 @@
         #region Constructors
         public Entry(Guid userId, DateOnly date, TimeOnly time, BristolStoolScale bristolStoolScale)
         {
-            Id = Guid.NewGuid();
             UserId = userId;
             Date = date;
             Time = time;
@@ -19,8 +18,9 @@
         #endregion
 
         #region Properties
-        public Guid Id { get; private set; }
+        public int Id { get; set; }
         public Guid UserId { get; private set; }
+        public virtual User User { get; set; } // `virtual` enables lazy loading and establishes UserId as a foreign key
         public DateOnly Date { get; set; }
         public TimeOnly Time { get; set; }
         public BristolStoolScale BristolStoolScale { get; set; }
