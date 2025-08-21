@@ -1,4 +1,6 @@
-﻿namespace Logs.Migrations
+﻿using System.Text.Json.Serialization;
+
+namespace Logs.Migrations
 {
     // Reference: https://doi.org/10.3109/00365529709011203
     public enum BristolStoolScale
@@ -20,6 +22,7 @@
         #region Properties
         public int Id { get; set; }
         public Guid UserId { get; private set; }
+        [JsonIgnore]
         public virtual User User { get; set; } // `virtual` enables lazy loading and establishes UserId as a foreign key
         public DateOnly Date { get; set; }
         public TimeOnly Time { get; set; }
