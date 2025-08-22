@@ -55,10 +55,12 @@ namespace Logs.Migrations
         }
         static void Create(char option)
         {
+            Console.Clear();
             Console.Write("Create ");
             switch (option)
             {
                 case 'a':
+                    DisplayOption($"{option}");
                     try
                     {
                         user = new(name: PromptUserInput("Name"), dateOfBirth: DateOnly.Parse(PromptUserInput("Date of birth")));
@@ -72,6 +74,7 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
+                    DisplayOption($"{option}");
                     try
                     {
                         DateTime now = DateTime.Now;
@@ -95,10 +98,12 @@ namespace Logs.Migrations
         }
         static void Read(char option)
         {
+            Console.Clear();
             Console.Write("Read ");
             switch (option)
             {
                 case 'a':
+                    DisplayOption($"{option}");
                     try
                     {
                         user = db.Users.Where(u => u.Name == PromptUserInput("Name")).First();
@@ -110,6 +115,7 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
+                    DisplayOption($"{option}");
                     try
                     {
                         int id = int.Parse(PromptUserInput("Id"));
@@ -129,20 +135,23 @@ namespace Logs.Migrations
         }
         static void Update(char option)
         {
+            Console.Clear();
             Console.Write("Update ");
             switch (option)
             {
                 case 'a':
+                    DisplayOption($"{option}");
                     try
                     {
                         throw new NotImplementedException("User update feature not implemented!");
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Console.WriteLine(e);
                     }
                     break;
                 case 'b':
+                    DisplayOption($"{option}");
                     try
                     {
                         int id = int.Parse(PromptUserInput("Id"));
@@ -165,10 +174,12 @@ namespace Logs.Migrations
         }
         static void Delete(char option)
         {
+            Console.Clear();
             Console.Write("Delete ");
             switch (option)
             {
                 case 'a':
+                    DisplayOption($"{option}");
                     try
                     {
                         user = db.Users.Where(u => u.Name == PromptUserInput("Name")).First();
@@ -185,6 +196,7 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
+                    DisplayOption($"{option}");
                     try
                     {
                         int id = int.Parse(PromptUserInput("Id"));
@@ -217,7 +229,7 @@ namespace Logs.Migrations
             string[] choices = ["a) User", "b) Entry"];
             Dictionary<string, string[]> prompt = new()
             {
-                { "" , [ "Choose one of the following options:", "c) Create", "r) Read", "u) Update", "d) Delete", "q) Quit", "g) Display all" ] },
+                { "" , [ "Choose one of the following options:", "c) Create", "r) Read", "u) Update", "d) Delete", "g) God mode", "q) Quit" ] },
                 { "c", [ "Create:", choices[0], choices[1] ] },
                 { "r", [ "Query:" , choices[0], choices[1] ] },
                 { "u", [ "Update:", choices[0], choices[1] ] },
@@ -225,7 +237,6 @@ namespace Logs.Migrations
                 { "a", [ "User"] },
                 { "b", [ "Entry"] },
                 { "q", [ "Goodbye" ] },
-                { "g", [ "Display all entities in the database" ] },
             };
             foreach (var item in prompt[option])
             {
