@@ -49,7 +49,8 @@ namespace Logs.Migrations
                         PromptInvalidInput($"{c}");
                         break;
                 }
-                Console.ReadKey();
+                Console.WriteLine("Returning to main menu in 2 seconds...");
+                Thread.Sleep(2000);
             }
             while (true);
         }
