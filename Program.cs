@@ -235,7 +235,11 @@ namespace Logs.Migrations
         static char GetOption()
         {
             char option;
-            while (!char.TryParse(Console.ReadLine(), out option)) ;
+            do
+            {
+                option = Console.ReadKey(true).KeyChar;
+            }
+            while (!('a' <= option && option <= 'z'));
             return option;
         }
     }
