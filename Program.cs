@@ -12,45 +12,44 @@ namespace Logs.Migrations
         static void Main(string[] args)
         {
             db = new();
-            Loop();
+            EventLoop();
         }
-        static void Loop()
+        static void EventLoop()
         {
             do
             {
-                DisplayOption();
+                DisplayPrompt();
                 char c = GetOption();
                 switch (c)
                 {
                     case 'c': // Create: create a new object and save to the database
-                        DisplayOption($"{c}");
+                        DisplayPrompt($"{c}");
                         Create(option: GetOption());
                         break;
                     case 'r': // Read: query the database for an object
-                        DisplayOption($"{c}");
+                        DisplayPrompt($"{c}");
                         Read(option: GetOption());
                         break;
                     case 'u': // Update: update an object and save to the database
-                        DisplayOption($"{c}");
+                        DisplayPrompt($"{c}");
                         Update(option: GetOption());
                         break;
                     case 'd': // Delete: delete an object from the database
-                        DisplayOption($"{c}");
+                        DisplayPrompt($"{c}");
                         Delete(option: GetOption());
                         break;
                     case 'q': // Quit: quit the application
-                        DisplayOption($"{c}");
+                        DisplayPrompt($"{c}");
                         return;
                     case 'g': // Display all entites in the database
-                        db.Users.ForEachAsync(Console.WriteLine);
-                        db.Entries.ForEachAsync(Console.WriteLine);
+                        DisplayDatabaseTables();
                         break;
                     default: // Catch-all: invalid selection case
-                        PromptInvalidInput($"{c}");
+                        RespondToInvalidInput($"{c}");
                         break;
                 }
-                Console.WriteLine("Returning to main menu in 2 seconds...");
-                Thread.Sleep(2000);
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
             }
             while (true);
         }
@@ -61,10 +60,10 @@ namespace Logs.Migrations
             switch (option)
             {
                 case 'a':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        user = new(name: PromptUserInput("Name"), dateOfBirth: DateOnly.Parse(PromptUserInput("Date of birth")));
+                        user = new(name: PromptUserForInput("Name"), dateOfBirth: DateOnly.Parse(PromptUserForInput("Date of birth")));
                         Console.WriteLine(user);
                         db.Add(user);
                         db.SaveChanges();
@@ -75,14 +74,14 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
                         DateTime now = DateTime.Now;
                         DateOnly date = DateOnly.FromDateTime(now);
                         TimeOnly time = TimeOnly.FromDateTime(now);
-                        Guid userId = db.Users.Where(u => u.Name == PromptUserInput("Name")).First().Id;
-                        Entry entry = new(userId: userId, date: date, time: time, bristolStoolScale: BristolStoolScale.Type4);
+                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                        entry = new(userId: userId, date: date, time: time, bristolStoolScale: BristolStoolScale.Type4);
                         Console.WriteLine(entry);
                         db.Add(entry);
                         db.SaveChanges();
@@ -93,7 +92,7 @@ namespace Logs.Migrations
                     }
                     break;
                 default:
-                    PromptInvalidInput($"{option}");
+                    RespondToInvalidInput($"{option}");
                     break;
             }
         }
@@ -104,10 +103,10 @@ namespace Logs.Migrations
             switch (option)
             {
                 case 'a':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        user = db.Users.Where(u => u.Name == PromptUserInput("Name")).First();
+                        user = db.Users.Where(u => u.Id == Guid.Parse(PromptUserForInput("Id"))).First();
                         Console.WriteLine(user);
                     }
                     catch (Exception e)
@@ -116,13 +115,11 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        int id = int.Parse(PromptUserInput("Id"));
-                        entry = db.Entries.Where(e => e.Id == id).First();
+                        entry = db.Entries.Where(e => e.Id == int.Parse(PromptUserForInput("Id"))).First();
                         Console.WriteLine(entry);
-
                     }
                     catch (Exception e)
                     {
@@ -130,7 +127,7 @@ namespace Logs.Migrations
                     }
                     break;
                 default:
-                    PromptInvalidInput($"{option}");
+                    RespondToInvalidInput($"{option}");
                     break;
             }
         }
@@ -141,10 +138,15 @@ namespace Logs.Migrations
             switch (option)
             {
                 case 'a':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        throw new NotImplementedException("User update feature not implemented!");
+                        user = db.Users.Where(u => u.Id == Guid.Parse(PromptUserForInput("Id"))).First();
+                        string name = PromptUserForInput("Name");
+                        DateOnly date = DateOnly.Parse(PromptUserForInput("Date of birth"));
+                        user.Name = name;
+                        user.DateOfBirth = date;
+                        db.SaveChanges();
                     }
                     catch (Exception e)
                     {
@@ -152,15 +154,18 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        int id = int.Parse(PromptUserInput("Id"));
-                        entry = db.Entries.Where(e => e.Id == id).First();
-                        entry.Date = DateOnly.Parse(PromptUserInput("Date"));
-                        entry.Time = TimeOnly.Parse(PromptUserInput("Time"));
-                        entry.BristolStoolScale = (BristolStoolScale)int.Parse(PromptUserInput("Bristol stool scale"));
-                        entry.Notes = PromptUserInput("Notes");
+                        entry = db.Entries.Where(e => e.Id == int.Parse(PromptUserForInput("Id"))).First();
+                        DateOnly date = DateOnly.Parse(PromptUserForInput("Date"));
+                        TimeOnly time = TimeOnly.Parse(PromptUserForInput("Time"));
+                        BristolStoolScale bss = (BristolStoolScale)int.Parse(PromptUserForInput("Bristol stool scale"));
+                        string? notes = PromptUserForInput("Notes");
+                        entry.Date = date;
+                        entry.Time = time;
+                        entry.BristolStoolScale = bss;
+                        entry.Notes = notes;
                         db.SaveChanges();
                     }
                     catch (Exception e)
@@ -169,7 +174,7 @@ namespace Logs.Migrations
                     }
                     break;
                 default:
-                    PromptInvalidInput($"{option}");
+                    RespondToInvalidInput($"{option}");
                     break;
             }
         }
@@ -180,10 +185,10 @@ namespace Logs.Migrations
             switch (option)
             {
                 case 'a':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        user = db.Users.Where(u => u.Name == PromptUserInput("Name")).First();
+                        user = db.Users.Where(u => u.Id == Guid.Parse(PromptUserForInput("Id"))).First();
                         foreach (var item in db.Entries.Where(e => e.UserId == user.Id))
                         {
                             db.Remove(item);
@@ -197,11 +202,10 @@ namespace Logs.Migrations
                     }
                     break;
                 case 'b':
-                    DisplayOption($"{option}");
+                    DisplayPrompt($"{option}");
                     try
                     {
-                        int id = int.Parse(PromptUserInput("Id"));
-                        entry = db.Entries.Where(e => e.Id == id).First();
+                        entry = db.Entries.Where(e => e.Id == int.Parse(PromptUserForInput("Id"))).First();
                         db.Remove(entry);
                         db.SaveChanges();
                     }
@@ -211,20 +215,28 @@ namespace Logs.Migrations
                     }
                     break;
                 default:
-                    PromptInvalidInput($"{option}");
+                    RespondToInvalidInput($"{option}");
                     break;
             }
         }
-        static void PromptInvalidInput(string input)
+        static void DisplayDatabaseTables()
+        {
+            Console.Clear();
+            Console.WriteLine("----------- Users -----------");
+            db.Users.ForEachAsync(Console.WriteLine);
+            Console.WriteLine("----------- Entries -----------");
+            db.Entries.ForEachAsync(Console.WriteLine);
+        }
+        static void RespondToInvalidInput(string input)
         {
             Console.WriteLine($"\"{input}\" is not a valid choice.");
         }
-        static string? PromptUserInput(string prompt)
+        static string? PromptUserForInput(string prompt)
         {
             Console.Write($"{prompt}: ");
             return Console.ReadLine();
         }
-        static void DisplayOption(string option = "") // TODO: fix menu prompting for code reusability
+        static void DisplayPrompt(string option = "") // TODO: fix menu prompting for code reusability
         {
             Console.Clear();
             string[] choices = ["a) User", "b) Entry"];
