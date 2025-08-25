@@ -13,8 +13,8 @@
 
         #region Properties
         public Guid Id { get; private set; }
-        public string? Name { get; private set; }
-        public DateOnly DateOfBirth { get; private set; }
+        public string? Name { get; set; }
+        public DateOnly DateOfBirth { get; set; }
         public int Age
         {
             get
