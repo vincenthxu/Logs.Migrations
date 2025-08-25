@@ -61,7 +61,9 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        user = new(name: PromptUserForInput("Name"), dateOfBirth: DateOnly.Parse(PromptUserForInput("Date of birth")));
+                        string name = PromptUserForInput("Name");
+                        DateOnly dob = DateOnly.Parse(PromptUserForInput("Date of birth"));
+                        user = new(name: name, dateOfBirth: dob);
                         Console.WriteLine(user);
                         db.Add(user);
                         db.SaveChanges();
@@ -102,7 +104,8 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        user = db.Users.Where(u => u.Id == Guid.Parse(PromptUserForInput("Id"))).First();
+                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                        user = db.Users.Where(u => u.Id == userId).First();
                         Console.WriteLine(user);
                     }
                     catch (Exception e)
@@ -114,7 +117,8 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        entry = db.Entries.Where(e => e.Id == int.Parse(PromptUserForInput("Id"))).First();
+                        int entryId = int.Parse(PromptUserForInput("Id"));
+                        entry = db.Entries.Where(e => e.Id == entryId).First();
                         Console.WriteLine(entry);
                     }
                     catch (Exception e)
@@ -135,11 +139,12 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        user = db.Users.Where(u => u.Id == Guid.Parse(PromptUserForInput("Id"))).First();
+                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                        user = db.Users.Where(u => u.Id == userId).First();
                         string name = PromptUserForInput("Name");
-                        DateOnly date = DateOnly.Parse(PromptUserForInput("Date of birth"));
+                        DateOnly dob = DateOnly.Parse(PromptUserForInput("Date of birth"));
                         user.Name = name;
-                        user.DateOfBirth = date;
+                        user.DateOfBirth = dob;
                         db.SaveChanges();
                     }
                     catch (Exception e)
@@ -151,7 +156,8 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        entry = db.Entries.Where(e => e.Id == int.Parse(PromptUserForInput("Id"))).First();
+                        int entryId = int.Parse(PromptUserForInput("Id"));
+                        entry = db.Entries.Where(e => e.Id == entryId).First();
                         DateOnly date = DateOnly.Parse(PromptUserForInput("Date"));
                         TimeOnly time = TimeOnly.Parse(PromptUserForInput("Time"));
                         BristolStoolScale bss = (BristolStoolScale)int.Parse(PromptUserForInput("Bristol stool scale"));
@@ -180,7 +186,8 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        user = db.Users.Where(u => u.Id == Guid.Parse(PromptUserForInput("Id"))).First();
+                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                        user = db.Users.Where(u => u.Id == userId).First();
                         foreach (var item in db.Entries.Where(e => e.UserId == user.Id))
                         {
                             db.Remove(item);
@@ -197,7 +204,8 @@ namespace Logs.Migrations
                     DisplayPrompt($"{option}");
                     try
                     {
-                        entry = db.Entries.Where(e => e.Id == int.Parse(PromptUserForInput("Id"))).First();
+                        int entryId = int.Parse(PromptUserForInput("Id"));
+                        entry = db.Entries.Where(e => e.Id == entryId).First();
                         db.Remove(entry);
                         db.SaveChanges();
                     }
