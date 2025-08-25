@@ -41,7 +41,7 @@ namespace Logs.Migrations
                     case 'q': // Quit: quit the application
                         DisplayPrompt($"{c}");
                         return;
-                    case 'g': // Display all entites in the database
+                    case 'g': // God-mode: display all entities in the database
                         DisplayDatabaseTables();
                         break;
                     default: // Catch-all: invalid selection case
@@ -55,8 +55,6 @@ namespace Logs.Migrations
         }
         static void Create(char option)
         {
-            Console.Clear();
-            Console.Write("Create ");
             switch (option)
             {
                 case 'a':
@@ -98,8 +96,6 @@ namespace Logs.Migrations
         }
         static void Read(char option)
         {
-            Console.Clear();
-            Console.Write("Read ");
             switch (option)
             {
                 case 'a':
@@ -133,8 +129,6 @@ namespace Logs.Migrations
         }
         static void Update(char option)
         {
-            Console.Clear();
-            Console.Write("Update ");
             switch (option)
             {
                 case 'a':
@@ -180,8 +174,6 @@ namespace Logs.Migrations
         }
         static void Delete(char option)
         {
-            Console.Clear();
-            Console.Write("Delete ");
             switch (option)
             {
                 case 'a':
