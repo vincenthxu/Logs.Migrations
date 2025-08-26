@@ -5,13 +5,10 @@ namespace Logs.Migrations
     internal class Program
     {
         #region Fields
-        static AppDbContext db;
-        static User user;
-        static Entry entry;
+        delegate void Operation();
         #endregion
         static void Main(string[] args)
         {
-            db = new();
             EventLoop();
         }
         static void EventLoop()
@@ -24,19 +21,19 @@ namespace Logs.Migrations
                 {
                     case 'c': // Create: create a new object and save to the database
                         DisplayPrompt($"{option}");
-                        Create(option: GetOption());
+                        CRUDAnObject(option: GetOption(), UserOperation: CreateUser, EntryOperation: CreateEntry);
                         break;
                     case 'r': // Read: query the database for an object
                         DisplayPrompt($"{option}");
-                        Read(option: GetOption());
+                        CRUDAnObject(option: GetOption(), UserOperation: ReadUser, EntryOperation: ReadEntry);
                         break;
                     case 'u': // Update: update an object and save to the database
                         DisplayPrompt($"{option}");
-                        Update(option: GetOption());
+                        CRUDAnObject(option: GetOption(), UserOperation: UpdateUser, EntryOperation: UpdateEntry);
                         break;
                     case 'd': // Delete: delete an object from the database
                         DisplayPrompt($"{option}");
-                        Delete(option: GetOption());
+                        CRUDAnObject(option: GetOption(), UserOperation: DeleteUser, EntryOperation: DeleteEntry);
                         break;
                     case 'q': // Quit: quit the application
                         DisplayPrompt($"{option}");
@@ -53,185 +50,188 @@ namespace Logs.Migrations
             }
             while (true);
         }
-        static void Create(char option)
+        static void CRUDAnObject(char option, Operation UserOperation, Operation EntryOperation)
         {
             switch (option)
             {
-                case 'a':
+                case 'a': // CRUD a User
                     DisplayPrompt($"{option}");
-                    try
-                    {
-                        string name = PromptUserForInput("Name");
-                        DateOnly dob = DateOnly.Parse(PromptUserForInput("Date of birth"));
-                        user = new(name: name, dateOfBirth: dob);
-                        Console.WriteLine(user);
-                        db.Add(user);
-                        db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                    UserOperation();
                     break;
-                case 'b':
+                case 'b': // CRUD an Entry
                     DisplayPrompt($"{option}");
-                    try
-                    {
-                        DateTime now = DateTime.Now;
-                        DateOnly date = DateOnly.FromDateTime(now);
-                        TimeOnly time = TimeOnly.FromDateTime(now);
-                        Guid userId = Guid.Parse(PromptUserForInput("User Id"));
-                        BristolStoolScale bristolStoolScale = BristolStoolScale.Type4;
-                        entry = new(userId: userId, date: date, time: time, bristolStoolScale: bristolStoolScale);
-                        Console.WriteLine(entry);
-                        db.Add(entry);
-                        db.SaveChanges();
-                    }
-                    catch(DbUpdateException e)
-                    {
-                        Console.WriteLine(e);
-                        db.ChangeTracker.Clear();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                    EntryOperation();
                     break;
-                default:
+                default: // Catch-all for invalid option
                     RespondToInvalidInput($"{option}");
                     break;
             }
         }
-        static void Read(char option)
+        private static void CreateUser()
         {
-            switch (option)
+            using (var db = new AppDbContext())
             {
-                case 'a':
-                    DisplayPrompt($"{option}");
-                    try
-                    {
-                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
-                        user = db.Users.Where(u => u.Id == userId).First();
-                        Console.WriteLine(user);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                    break;
-                case 'b':
-                    DisplayPrompt($"{option}");
-                    try
-                    {
-                        int entryId = int.Parse(PromptUserForInput("Id"));
-                        entry = db.Entries.Where(e => e.Id == entryId).First();
-                        Console.WriteLine(entry);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                    break;
-                default:
-                    RespondToInvalidInput($"{option}");
-                    break;
+                try
+                {
+                    string name = PromptUserForInput("Name");
+                    DateOnly dob = DateOnly.Parse(PromptUserForInput("Date of birth"));
+                    User user = new(name: name, dateOfBirth: dob);
+                    Console.WriteLine(user);
+                    db.Add(user);
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
         }
-        static void Update(char option)
+        private static void CreateEntry()
         {
-            switch (option)
+            using (var db = new AppDbContext())
             {
-                case 'a':
-                    DisplayPrompt($"{option}");
-                    try
-                    {
-                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
-                        user = db.Users.Where(u => u.Id == userId).First();
-                        string name = PromptUserForInput("Name");
-                        DateOnly dob = DateOnly.Parse(PromptUserForInput("Date of birth"));
-                        user.Name = name;
-                        user.DateOfBirth = dob;
-                        db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                    break;
-                case 'b':
-                    DisplayPrompt($"{option}");
-                    try
-                    {
-                        int entryId = int.Parse(PromptUserForInput("Id"));
-                        entry = db.Entries.Where(e => e.Id == entryId).First();
-                        DateOnly date = DateOnly.Parse(PromptUserForInput("Date"));
-                        TimeOnly time = TimeOnly.Parse(PromptUserForInput("Time"));
-                        BristolStoolScale bss = (BristolStoolScale)int.Parse(PromptUserForInput("Bristol stool scale"));
-                        string? notes = PromptUserForInput("Notes");
-                        entry.Date = date;
-                        entry.Time = time;
-                        entry.BristolStoolScale = bss;
-                        entry.Notes = notes;
-                        db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"{e}");
-                    }
-                    break;
-                default:
-                    RespondToInvalidInput($"{option}");
-                    break;
+                try
+                {
+                    DateTime now = DateTime.Now;
+                    DateOnly date = DateOnly.FromDateTime(now);
+                    TimeOnly time = TimeOnly.FromDateTime(now);
+                    Guid userId = Guid.Parse(PromptUserForInput("User Id"));
+                    BristolStoolScale bristolStoolScale = BristolStoolScale.Type4;
+                    Entry entry = new(userId: userId, date: date, time: time, bristolStoolScale: bristolStoolScale);
+                    Console.WriteLine(entry);
+                    db.Add(entry);
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
         }
-        static void Delete(char option)
+        private static void ReadUser()
         {
-            switch (option)
+            using (var db = new AppDbContext())
             {
-                case 'a':
-                    DisplayPrompt($"{option}");
-                    try
-                    {
-                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
-                        user = db.Users.Where(u => u.Id == userId).First();
-                        foreach (var item in db.Entries.Where(e => e.UserId == user.Id))
-                        {
-                            db.Remove(item);
-                        }
-                        db.Remove(user);
-                        db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                    break;
-                case 'b':
-                    DisplayPrompt($"{option}");
-                    try
-                    {
-                        int entryId = int.Parse(PromptUserForInput("Id"));
-                        entry = db.Entries.Where(e => e.Id == entryId).First();
-                        db.Remove(entry);
-                        db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                    break;
-                default:
-                    RespondToInvalidInput($"{option}");
-                    break;
+                try
+                {
+                    Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                    User user = db.Users.Where(u => u.Id == userId).First();
+                    Console.WriteLine(user);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
         }
-        static void DisplayDatabaseTables()
+        private static void ReadEntry()
         {
-            Console.Clear();
-            Console.WriteLine("----------- Users -----------");
-            db.Users.ForEachAsync(Console.WriteLine);
-            Console.WriteLine("----------- Entries -----------");
-            db.Entries.ForEachAsync(Console.WriteLine);
+            using (var db = new AppDbContext())
+            {
+                try
+                {
+                    int entryId = int.Parse(PromptUserForInput("Id"));
+                    Entry entry = db.Entries.Where(e => e.Id == entryId).First();
+                    Console.WriteLine(entry);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+        private static void UpdateUser()
+        {
+            using (var db = new AppDbContext())
+            {
+                try
+                {
+                    Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                    User user = db.Users.Where(u => u.Id == userId).First();
+                    string name = PromptUserForInput("Name");
+                    DateOnly dob = DateOnly.Parse(PromptUserForInput("Date of birth"));
+                    user.Name = name;
+                    user.DateOfBirth = dob;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+        private static void UpdateEntry()
+        {
+            using (var db = new AppDbContext())
+            {
+                try
+                {
+                    int entryId = int.Parse(PromptUserForInput("Id"));
+                    Entry entry = db.Entries.Where(e => e.Id == entryId).First();
+                    DateOnly date = DateOnly.Parse(PromptUserForInput("Date"));
+                    TimeOnly time = TimeOnly.Parse(PromptUserForInput("Time"));
+                    BristolStoolScale bss = (BristolStoolScale)int.Parse(PromptUserForInput("Bristol stool scale"));
+                    string? notes = PromptUserForInput("Notes");
+                    entry.Date = date;
+                    entry.Time = time;
+                    entry.BristolStoolScale = bss;
+                    entry.Notes = notes;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e}");
+                }
+            }
+        }
+        private static void DeleteUser()
+        {
+            using (var db = new AppDbContext())
+            {
+                try
+                {
+                    Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                    User user = db.Users.Where(u => u.Id == userId).First();
+                    foreach (var item in db.Entries.Where(e => e.UserId == user.Id))
+                    {
+                        db.Remove(item);
+                    }
+                    db.Remove(user);
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+        private static void DeleteEntry()
+        {
+            using (var db = new AppDbContext())
+            {
+                try
+                {
+                    int entryId = int.Parse(PromptUserForInput("Id"));
+                    Entry entry = db.Entries.Where(e => e.Id == entryId).First();
+                    db.Remove(entry);
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+        private static void DisplayDatabaseTables()
+        {
+            using (var db = new AppDbContext())
+            {
+                Console.Clear();
+                Console.WriteLine("----------- Users -----------");
+                db.Users.ForEachAsync(Console.WriteLine);
+                Console.WriteLine("----------- Entries -----------");
+                db.Entries.ForEachAsync(Console.WriteLine);
+            }
         }
         static void RespondToInvalidInput(string input)
         {
@@ -241,6 +241,16 @@ namespace Logs.Migrations
         {
             Console.Write($"{prompt}: ");
             return Console.ReadLine();
+        }
+        static char GetOption()
+        {
+            char option;
+            do
+            {
+                option = Console.ReadKey(true).KeyChar;
+            }
+            while (!('a' <= option && option <= 'z'));
+            return option;
         }
         static void DisplayPrompt(string option = "") // TODO: fix menu prompting for code reusability
         {
@@ -261,16 +271,6 @@ namespace Logs.Migrations
             {
                 Console.WriteLine(item);
             }
-        }
-        static char GetOption()
-        {
-            char option;
-            do
-            {
-                option = Console.ReadKey(true).KeyChar;
-            }
-            while (!('a' <= option && option <= 'z'));
-            return option;
         }
     }
 }
