@@ -81,7 +81,8 @@ namespace Logs.Migrations
                         DateOnly date = DateOnly.FromDateTime(now);
                         TimeOnly time = TimeOnly.FromDateTime(now);
                         Guid userId = Guid.Parse(PromptUserForInput("User Id"));
-                        entry = new(userId: userId, date: date, time: time, bristolStoolScale: BristolStoolScale.Type4);
+                        BristolStoolScale bristolStoolScale = BristolStoolScale.Type4;
+                        entry = new(userId: userId, date: date, time: time, bristolStoolScale: bristolStoolScale);
                         Console.WriteLine(entry);
                         db.Add(entry);
                         db.SaveChanges();
