@@ -87,6 +87,11 @@ namespace Logs.Migrations
                         db.Add(entry);
                         db.SaveChanges();
                     }
+                    catch(DbUpdateException e)
+                    {
+                        Console.WriteLine(e);
+                        db.ChangeTracker.Clear();
+                    }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
