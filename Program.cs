@@ -19,33 +19,33 @@ namespace Logs.Migrations
             do
             {
                 DisplayPrompt();
-                char c = GetOption();
-                switch (c)
+                char option = GetOption();
+                switch (option)
                 {
                     case 'c': // Create: create a new object and save to the database
-                        DisplayPrompt($"{c}");
+                        DisplayPrompt($"{option}");
                         Create(option: GetOption());
                         break;
                     case 'r': // Read: query the database for an object
-                        DisplayPrompt($"{c}");
+                        DisplayPrompt($"{option}");
                         Read(option: GetOption());
                         break;
                     case 'u': // Update: update an object and save to the database
-                        DisplayPrompt($"{c}");
+                        DisplayPrompt($"{option}");
                         Update(option: GetOption());
                         break;
                     case 'd': // Delete: delete an object from the database
-                        DisplayPrompt($"{c}");
+                        DisplayPrompt($"{option}");
                         Delete(option: GetOption());
                         break;
                     case 'q': // Quit: quit the application
-                        DisplayPrompt($"{c}");
+                        DisplayPrompt($"{option}");
                         return;
                     case 'g': // God-mode: display all entities in the database
                         DisplayDatabaseTables();
                         break;
                     default: // Catch-all: invalid selection case
-                        RespondToInvalidInput($"{c}");
+                        RespondToInvalidInput($"{option}");
                         break;
                 }
                 Console.WriteLine("Press any key to continue...");
