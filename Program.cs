@@ -80,7 +80,7 @@ namespace Logs.Migrations
                         DateTime now = DateTime.Now;
                         DateOnly date = DateOnly.FromDateTime(now);
                         TimeOnly time = TimeOnly.FromDateTime(now);
-                        Guid userId = Guid.Parse(PromptUserForInput("Id"));
+                        Guid userId = Guid.Parse(PromptUserForInput("User Id"));
                         entry = new(userId: userId, date: date, time: time, bristolStoolScale: BristolStoolScale.Type4);
                         Console.WriteLine(entry);
                         db.Add(entry);
