@@ -19,19 +19,19 @@ namespace Logs.Migrations
                 {
                     case 'c': // Create: create a new object and save to the database
                         DisplayPrompt($"{option}");
-                        CRUDAnObject(option: GetOption(), UserOperation: CreateUser, EntryOperation: CreateEntry);
+                        CRUDAnObject(UserOperation: CreateUser, EntryOperation: CreateEntry);
                         break;
                     case 'r': // Read: query the database for an object
                         DisplayPrompt($"{option}");
-                        CRUDAnObject(option: GetOption(), UserOperation: ReadUser, EntryOperation: ReadEntry);
+                        CRUDAnObject(UserOperation: ReadUser, EntryOperation: ReadEntry);
                         break;
                     case 'u': // Update: update an object and save to the database
                         DisplayPrompt($"{option}");
-                        CRUDAnObject(option: GetOption(), UserOperation: UpdateUser, EntryOperation: UpdateEntry);
+                        CRUDAnObject(UserOperation: UpdateUser, EntryOperation: UpdateEntry);
                         break;
                     case 'd': // Delete: delete an object from the database
                         DisplayPrompt($"{option}");
-                        CRUDAnObject(option: GetOption(), UserOperation: DeleteUser, EntryOperation: DeleteEntry);
+                        CRUDAnObject(UserOperation: DeleteUser, EntryOperation: DeleteEntry);
                         break;
                     case 'q': // Quit: quit the application
                         DisplayPrompt($"{option}");
@@ -48,8 +48,9 @@ namespace Logs.Migrations
             }
             while (true);
         }
-        static void CRUDAnObject(char option, Operation UserOperation, Operation EntryOperation)
+        static void CRUDAnObject(Operation UserOperation, Operation EntryOperation)
         {
+            char option = GetOption();
             switch (option)
             {
                 case 'a': // CRUD a User
