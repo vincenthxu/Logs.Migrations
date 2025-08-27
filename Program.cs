@@ -4,9 +4,7 @@ namespace Logs.Migrations
 {
     internal class Program
     {
-        #region Fields
         delegate void Operation();
-        #endregion
         static void Main(string[] args)
         {
             EventLoop();
